@@ -1,6 +1,7 @@
 import crypto from 'crypto';
 import fs from 'fs';
 import path from 'path';
+import { STORAGE, APP_CONFIG, COMMON_STRINGS } from '../constants';
 import {
   Expense,
   CreateExpensePayload,
@@ -125,18 +126,18 @@ let useFileStorage = true;
 // Helper to load expenses from JSON file or seed data
 function loadExpenses(): void {
   try {
-    const dir = path.dirname("./src/data/expenses.json");
+    const dir = path.dirname(STORAGE.DATA_FILE);
     if (!fs.existsSync(dir)) {
       fs.mkdirSync(dir, { recursive: true });
     }
 
-    if (fs.existsSync("./src/data/expenses.json") && useFileStorage) {
-      const fileData = fs.readFileSync("./src/data/expenses.json", "utf8");
+    if (fs.existsSync(STORAGE.DATA_FILE) && useFileStorage) {
+      const fileData = fs.readFileSync(STORAGE.DATA_FILE, APP_CONFIG.ENCODING_UTF8);
       expenses = JSON.parse(fileData);
     } else {
       expenses = JSON.parse(JSON.stringify(initialExpenses));
       if (useFileStorage) {
-        fs.writeFileSync("./src/data/expenses.json", JSON.stringify(expenses, null, 2), "utf8");
+        fs.writeFileSync(STORAGE.DATA_FILE, JSON.stringify(expenses, null, 2), APP_CONFIG.ENCODING_UTF8);
       }
     }
   } catch {
@@ -149,14 +150,14 @@ function loadExpenses(): void {
 function saveExpenses(): void {
   if (!useFileStorage) return;
   try {
-    const dir = path.dirname("./src/data/expenses.json");
+    const dir = path.dirname(STORAGE.DATA_FILE);
     if (!fs.existsSync(dir)) {
       fs.mkdirSync(dir, { recursive: true });
     }
     // Write atomically to temp file, then rename atomically to prevent partial writes during high concurrency
     const dataString = JSON.stringify(expenses, null, 2);
-    fs.writeFileSync("./src/data/expenses.tmp", dataString, "utf8");
-    fs.renameSync("./src/data/expenses.tmp", "./src/data/expenses.json");
+    fs.writeFileSync(STORAGE.TEMP_FILE, dataString, APP_CONFIG.ENCODING_UTF8);
+    fs.renameSync(STORAGE.TEMP_FILE, STORAGE.DATA_FILE);
   } catch (err: any) {
     console.warn('Warning: Could not persist expenses to JSON file:', err.message);
   }
@@ -384,7 +385,7 @@ export const expensesStore = {
       ];
     });
 
-    return [STORAGE.CSV_HEADERS.join(","), ...rows.map((r) => r.join(","))].join(
+    return [STORAGE.CSV_HEADERS.join(COMMON_STRINGS.COMMA), ...rows.map((r) => r.join(COMMON_STRINGS.COMMA))].join(
       COMMON_STRINGS.NEWLINE,
     );
   },

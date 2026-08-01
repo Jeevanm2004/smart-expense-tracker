@@ -1,5 +1,6 @@
 import { Request, Response } from 'express';
 import { expensesStore } from '../store/expensesStore';
+import { VALIDATION, HttpStatus, ErrorResponse, HeaderKey, HeaderValue, COMMON_STRINGS } from '../constants';
 import { CreateExpensePayload, UpdateExpensePayload } from '../types';
 
 /**
@@ -61,7 +62,7 @@ export const expensesController = {
     }
 
     if (errors.length > 0) {
-      return res.status(400).json({
+      return res.status(HttpStatus.BAD_REQUEST).json({
         error: ErrorResponse.VALIDATION_FAILED,
         message: errors.join(' '),
       });
@@ -73,7 +74,7 @@ export const expensesController = {
       category: sanitizeText(category),
       date: date!,
     });
-    return res.status(201).json(createdExpense);
+    return res.status(HttpStatus.CREATED).json(createdExpense);
   },
 
   /**
@@ -83,12 +84,12 @@ export const expensesController = {
     const { id } = req.params as { id: string };
     const item = expensesStore.getById(id);
     if (!item) {
-      return res.status(404).json({
-        error: "Not Found",
+      return res.status(HttpStatus.NOT_FOUND).json({
+        error: ErrorResponse.NOT_FOUND,
         message: `Expense with ID '${id}' not found.`,
       });
     }
-    return res.status(200).json(item);
+    return res.status(HttpStatus.OK).json(item);
   },
 
   /**
@@ -100,8 +101,8 @@ export const expensesController = {
 
     const existing = expensesStore.getById(id);
     if (!existing) {
-      return res.status(404).json({
-        error: "Not Found",
+      return res.status(HttpStatus.NOT_FOUND).json({
+        error: ErrorResponse.NOT_FOUND,
         message: `Expense with ID '${id}' not found.`,
       });
     }
@@ -133,7 +134,7 @@ export const expensesController = {
     }
 
     if (errors.length > 0) {
-      return res.status(400).json({
+      return res.status(HttpStatus.BAD_REQUEST).json({
         error: ErrorResponse.VALIDATION_FAILED,
         message: errors.join(' '),
       });
@@ -145,7 +146,7 @@ export const expensesController = {
       category: category !== undefined ? sanitizeText(category) : undefined,
       date,
     });
-    return res.status(200).json(updated);
+    return res.status(HttpStatus.OK).json(updated);
   },
 
   /**
@@ -163,7 +164,7 @@ export const expensesController = {
     }
 
     if (errors.length > 0) {
-      return res.status(400).json({
+      return res.status(HttpStatus.BAD_REQUEST).json({
         error: ErrorResponse.VALIDATION_FAILED,
         message: errors.join(' '),
       });
@@ -177,7 +178,7 @@ export const expensesController = {
       page: typeof page === 'string' || typeof page === 'number' ? page : undefined,
       limit: typeof limit === 'string' || typeof limit === 'number' ? limit : undefined,
     });
-    return res.status(200).json(items);
+    return res.status(HttpStatus.OK).json(items);
   },
 
   /**
@@ -185,7 +186,7 @@ export const expensesController = {
    */
   getTotals: (req: Request, res: Response) => {
     const totals = expensesStore.getTotals();
-    return res.status(200).json(totals);
+    return res.status(HttpStatus.OK).json(totals);
   },
 
   /**
@@ -193,7 +194,7 @@ export const expensesController = {
    */
   getMonthlySummary: (req: Request, res: Response) => {
     const summary = expensesStore.getMonthlySummary();
-    return res.status(200).json(summary);
+    return res.status(HttpStatus.OK).json(summary);
   },
 
   /**
@@ -203,7 +204,7 @@ export const expensesController = {
     const csvContent = expensesStore.toCSV();
     res.setHeader(HeaderKey.CONTENT_TYPE, HeaderValue.TEXT_CSV);
     res.setHeader(HeaderKey.CONTENT_DISPOSITION, HeaderValue.CSV_ATTACHMENT);
-    return res.status(200).send(csvContent);
+    return res.status(HttpStatus.OK).send(csvContent);
   },
 
   /**
@@ -212,21 +213,21 @@ export const expensesController = {
   deleteExpense: (req: Request, res: Response) => {
     const { id } = req.params as { id: string };
     if (!id) {
-      return res.status(400).json({
-        error: "Bad Request",
+      return res.status(HttpStatus.BAD_REQUEST).json({
+        error: ErrorResponse.BAD_REQUEST,
         message: VALIDATION.ID.REQUIRED_MSG,
       });
     }
 
     const success = expensesStore.remove(id);
     if (!success) {
-      return res.status(404).json({
-        error: "Not Found",
+      return res.status(HttpStatus.NOT_FOUND).json({
+        error: ErrorResponse.NOT_FOUND,
         message: `Expense with ID '${id}' not found.`,
       });
     }
 
-    return res.status(200).json({
+    return res.status(HttpStatus.OK).json({
       message: `Expense '${id}' successfully deleted.`,
       id,
     });
