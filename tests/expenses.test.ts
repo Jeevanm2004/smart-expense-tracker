@@ -1,33 +1,36 @@
-const request = require('supertest');
-const app = require('../src/app');
-const expensesStore = require('../src/store/expensesStore');
+import request from 'supertest';
+import app from '../src/app';
+import { expensesStore } from '../src/store/expensesStore';
 
 describe('Smart Expense Tracker REST API Tests (Enterprise Suite)', () => {
   beforeEach(() => {
     // Reset store in pure memory mode before each test
-    expensesStore.reset([
-      {
-        id: 'test-1',
-        title: 'Lunch at Cafe',
-        amount: 25.50,
-        category: 'Food',
-        date: '2026-07-28'
-      },
-      {
-        id: 'test-2',
-        title: 'Taxi Ride',
-        amount: 40.00,
-        category: 'Travel',
-        date: '2026-07-29'
-      },
-      {
-        id: 'test-3',
-        title: 'Electricity Bill',
-        amount: 100.00,
-        category: 'Utilities',
-        date: '2026-07-30'
-      }
-    ], false);
+    expensesStore.reset(
+      [
+        {
+          id: 'test-1',
+          title: 'Lunch at Cafe',
+          amount: 25.5,
+          category: 'Food',
+          date: '2026-07-28',
+        },
+        {
+          id: 'test-2',
+          title: 'Taxi Ride',
+          amount: 40.0,
+          category: 'Travel',
+          date: '2026-07-29',
+        },
+        {
+          id: 'test-3',
+          title: 'Electricity Bill',
+          amount: 100.0,
+          category: 'Utilities',
+          date: '2026-07-30',
+        },
+      ],
+      false,
+    );
   });
 
   describe('GET /health', () => {
@@ -46,12 +49,10 @@ describe('Smart Expense Tracker REST API Tests (Enterprise Suite)', () => {
         title: 'New Books',
         amount: 50.25,
         category: 'Education',
-        date: '2026-07-31'
+        date: '2026-07-31',
       };
 
-      const response = await request(app)
-        .post('/expenses')
-        .send(payload);
+      const response = await request(app).post('/expenses').send(payload);
 
       expect(response.status).toBe(201);
       expect(response.body).toHaveProperty('id');
@@ -77,12 +78,10 @@ describe('Smart Expense Tracker REST API Tests (Enterprise Suite)', () => {
         title: '   ',
         amount: 20,
         category: 'Food',
-        date: '2026-07-31'
+        date: '2026-07-31',
       };
 
-      const response = await request(app)
-        .post('/expenses')
-        .send(payload);
+      const response = await request(app).post('/expenses').send(payload);
 
       expect(response.status).toBe(400);
       expect(response.body.error).toBe('Validation Failed');
@@ -93,12 +92,10 @@ describe('Smart Expense Tracker REST API Tests (Enterprise Suite)', () => {
         title: 'A'.repeat(151),
         amount: 20,
         category: 'Food',
-        date: '2026-07-31'
+        date: '2026-07-31',
       };
 
-      const response = await request(app)
-        .post('/expenses')
-        .send(payload);
+      const response = await request(app).post('/expenses').send(payload);
 
       expect(response.status).toBe(400);
       expect(response.body.message).toContain('title cannot exceed 150 characters');
@@ -109,12 +106,10 @@ describe('Smart Expense Tracker REST API Tests (Enterprise Suite)', () => {
         title: 'Gym Membership',
         amount: -15,
         category: 'Health',
-        date: '2026-07-31'
+        date: '2026-07-31',
       };
 
-      const response = await request(app)
-        .post('/expenses')
-        .send(payload);
+      const response = await request(app).post('/expenses').send(payload);
 
       expect(response.status).toBe(400);
       expect(response.body.error).toBe('Validation Failed');
@@ -123,14 +118,12 @@ describe('Smart Expense Tracker REST API Tests (Enterprise Suite)', () => {
     it('should return 400 if date string format is invalid', async () => {
       const payload = {
         title: 'Dinner',
-        amount: 35.00,
+        amount: 35.0,
         category: 'Food',
-        date: '31-07-2026'
+        date: '31-07-2026',
       };
 
-      const response = await request(app)
-        .post('/expenses')
-        .send(payload);
+      const response = await request(app).post('/expenses').send(payload);
 
       expect(response.status).toBe(400);
       expect(response.body.error).toBe('Validation Failed');
@@ -139,14 +132,12 @@ describe('Smart Expense Tracker REST API Tests (Enterprise Suite)', () => {
     it('should return 400 for impossible calendar date like 2026-02-30', async () => {
       const payload = {
         title: 'Leap Year Check',
-        amount: 50.00,
+        amount: 50.0,
         category: 'Utilities',
-        date: '2026-02-30'
+        date: '2026-02-30',
       };
 
-      const response = await request(app)
-        .post('/expenses')
-        .send(payload);
+      const response = await request(app).post('/expenses').send(payload);
 
       expect(response.status).toBe(400);
       expect(response.body.error).toBe('Validation Failed');
@@ -160,7 +151,7 @@ describe('Smart Expense Tracker REST API Tests (Enterprise Suite)', () => {
       expect(response.status).toBe(200);
       expect(response.body.id).toBe('test-1');
       expect(response.body.title).toBe('Lunch at Cafe');
-      expect(response.body.amount).toBe(25.50);
+      expect(response.body.amount).toBe(25.5);
     });
 
     it('should return 404 if expense with specified ID is not found', async () => {
@@ -175,12 +166,10 @@ describe('Smart Expense Tracker REST API Tests (Enterprise Suite)', () => {
     it('should update an existing expense and return 200', async () => {
       const payload = {
         title: 'Lunch at Cafe (Updated)',
-        amount: 30.00
+        amount: 30.0,
       };
 
-      const response = await request(app)
-        .put('/expenses/test-1')
-        .send(payload);
+      const response = await request(app).put('/expenses/test-1').send(payload);
 
       expect(response.status).toBe(200);
       expect(response.body.id).toBe('test-1');
@@ -190,9 +179,7 @@ describe('Smart Expense Tracker REST API Tests (Enterprise Suite)', () => {
     });
 
     it('should return 404 when updating non-existent expense ID', async () => {
-      const response = await request(app)
-        .put('/expenses/missing-id')
-        .send({ title: 'New Title' });
+      const response = await request(app).put('/expenses/missing-id').send({ title: 'New Title' });
 
       expect(response.status).toBe(404);
       expect(response.body.error).toBe('Not Found');
@@ -229,8 +216,8 @@ describe('Smart Expense Tracker REST API Tests (Enterprise Suite)', () => {
 
       expect(response.status).toBe(200);
       expect(response.body.length).toBe(2);
-      expect(response.body.some(e => e.id === 'test-2')).toBe(true);
-      expect(response.body.some(e => e.id === 'test-3')).toBe(true);
+      expect(response.body.some((e: any) => e.id === 'test-2')).toBe(true);
+      expect(response.body.some((e: any) => e.id === 'test-3')).toBe(true);
     });
   });
 
@@ -241,10 +228,10 @@ describe('Smart Expense Tracker REST API Tests (Enterprise Suite)', () => {
       expect(response.status).toBe(200);
       expect(response.body).toHaveProperty('overall');
       expect(response.body).toHaveProperty('byCategory');
-      expect(response.body.overall).toBe(165.50);
-      expect(response.body.byCategory.Food).toBe(25.50);
-      expect(response.body.byCategory.Travel).toBe(40.00);
-      expect(response.body.byCategory.Utilities).toBe(100.00);
+      expect(response.body.overall).toBe(165.5);
+      expect(response.body.byCategory.Food).toBe(25.5);
+      expect(response.body.byCategory.Travel).toBe(40.0);
+      expect(response.body.byCategory.Utilities).toBe(100.0);
     });
   });
 
@@ -256,7 +243,7 @@ describe('Smart Expense Tracker REST API Tests (Enterprise Suite)', () => {
       expect(Array.isArray(response.body)).toBe(true);
       expect(response.body.length).toBe(1);
       expect(response.body[0].month).toBe('2026-07');
-      expect(response.body[0].totalAmount).toBe(165.50);
+      expect(response.body[0].totalAmount).toBe(165.5);
       expect(response.body[0].topCategory).toBe('Utilities');
     });
   });
@@ -281,7 +268,7 @@ describe('Smart Expense Tracker REST API Tests (Enterprise Suite)', () => {
 
       const getResponse = await request(app).get('/expenses');
       expect(getResponse.body.length).toBe(2);
-      expect(getResponse.body.find(e => e.id === 'test-1')).toBeUndefined();
+      expect(getResponse.body.find((e: any) => e.id === 'test-1')).toBeUndefined();
     });
 
     it('should return 404 when deleting a non-existent expense ID', async () => {
