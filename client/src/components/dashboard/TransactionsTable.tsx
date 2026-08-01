@@ -17,7 +17,8 @@ import {
   Plus,
   Eye,
   Calendar,
-  X
+  X,
+  Search,
 } from 'lucide-react';
 
 interface TransactionsTableProps {
@@ -35,6 +36,8 @@ interface TransactionsTableProps {
   setEndDate: (date: string) => void;
   categories: string[];
   isLoading: boolean;
+  searchQuery: string;
+  setSearchQuery: (query: string) => void;
 }
 
 export const TransactionsTable: React.FC<TransactionsTableProps> = ({
@@ -51,7 +54,9 @@ export const TransactionsTable: React.FC<TransactionsTableProps> = ({
   endDate,
   setEndDate,
   categories,
-  isLoading
+  isLoading,
+  searchQuery,
+  setSearchQuery,
 }) => {
   const [sortField, setSortField] = useState<SortField>('date');
   const [sortOrder, setSortOrder] = useState<SortOrder>('desc');
@@ -82,41 +87,62 @@ export const TransactionsTable: React.FC<TransactionsTableProps> = ({
   });
 
   const totalPages = Math.max(Math.ceil(sortedExpenses.length / pageSize), 1);
-  const paginatedExpenses = sortedExpenses.slice(
-    (currentPage - 1) * pageSize,
-    currentPage * pageSize
-  );
+  const paginatedExpenses = sortedExpenses.slice((currentPage - 1) * pageSize, currentPage * pageSize);
 
   const getCategoryBadgeVariant = (cat: string) => {
     switch (cat) {
-      case 'Food': return 'indigo';
-      case 'Travel': return 'blue';
-      case 'Utilities': return 'purple';
-      case 'Entertainment': return 'rose';
-      default: return 'emerald';
+      case 'Food':
+        return 'indigo';
+      case 'Travel':
+        return 'blue';
+      case 'Utilities':
+        return 'purple';
+      case 'Entertainment':
+        return 'rose';
+      default:
+        return 'emerald';
     }
   };
 
   return (
     <Card className="overflow-hidden p-0">
       {/* Table Header Bar */}
-      <div className="p-6 border-b border-slate-200/60 dark:border-slate-800/60 flex flex-col md:flex-row md:items-center justify-between gap-4">
+      <div className="p-6 border-b border-slate-200/60 dark:border-slate-800/60 flex flex-col lg:flex-row lg:items-center justify-between gap-4">
         <div>
-          <h3 className="text-lg font-extrabold text-slate-900 dark:text-white tracking-tight">
-            Transaction History
-          </h3>
+          <h3 className="text-lg font-extrabold text-slate-900 dark:text-white tracking-tight">Transaction History</h3>
           <p className="text-xs font-semibold text-slate-400 dark:text-slate-500">
             Showing {sortedExpenses.length} total records
           </p>
         </div>
 
-        <div className="flex items-center gap-3">
-          <Button variant="secondary" size="sm" onClick={onDownloadCSV} leftIcon={<Download className="w-4 h-4 text-indigo-500" />}>
-            Export CSV
-          </Button>
-          <Button variant="primary" size="sm" onClick={onOpenAddModal} leftIcon={<Plus className="w-4 h-4" />}>
-            Add Expense
-          </Button>
+        <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3 flex-wrap">
+          {/* Table Search Input */}
+          <div className="relative w-full sm:w-64">
+            <Search className="w-3.5 h-3.5 absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 dark:text-slate-500" />
+            <input
+              type="text"
+              placeholder="Search transactions..."
+              value={searchQuery}
+              onChange={(e) => {
+                setSearchQuery(e.target.value);
+                setCurrentPage(1);
+              }}
+              className="w-full pl-9 pr-3 py-2 bg-slate-50 dark:bg-[#161922] border border-slate-200/80 dark:border-slate-800/80 rounded-xl text-xs font-semibold text-slate-900 dark:text-white placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-indigo-500/50 focus:border-indigo-500 transition-all"
+            />
+          </div>
+          <div className="flex items-center gap-3">
+            <Button
+              variant="secondary"
+              size="sm"
+              onClick={onDownloadCSV}
+              leftIcon={<Download className="w-4 h-4 text-indigo-500" />}
+            >
+              Export CSV
+            </Button>
+            <Button variant="primary" size="sm" onClick={onOpenAddModal} leftIcon={<Plus className="w-4 h-4" />}>
+              Add Expense
+            </Button>
+          </div>
         </div>
       </div>
 
@@ -148,9 +174,11 @@ export const TransactionsTable: React.FC<TransactionsTableProps> = ({
 
         {/* Date Range Picker Controls */}
         <div className="flex items-center gap-2.5 flex-wrap">
-          <div className="flex items-center gap-1.5 px-3 py-1.5 bg-white dark:bg-slate-800/60 border border-slate-200/80 dark:border-slate-700/60 rounded-xl text-xs font-bold text-slate-600 dark:text-slate-300 shadow-sm">
+          <label className="flex items-center gap-1.5 px-3 py-1.5 bg-white dark:bg-slate-800/60 border border-slate-200/80 dark:border-slate-700/60 rounded-xl text-xs font-bold text-slate-600 dark:text-slate-300 shadow-sm cursor-pointer">
             <Calendar className="w-3.5 h-3.5 text-indigo-500" />
-            <span className="text-[11px] text-slate-400 dark:text-slate-500 uppercase tracking-wider font-extrabold mr-1">From</span>
+            <span className="text-[11px] text-slate-400 dark:text-slate-500 uppercase tracking-wider font-extrabold mr-1">
+              From
+            </span>
             <input
               type="date"
               value={startDate}
@@ -158,13 +186,15 @@ export const TransactionsTable: React.FC<TransactionsTableProps> = ({
                 setStartDate(e.target.value);
                 setCurrentPage(1);
               }}
-              className="bg-transparent text-slate-900 dark:text-white focus:outline-none text-xs font-bold"
+              className="bg-transparent text-slate-900 dark:text-white focus:outline-none text-xs font-bold cursor-pointer"
             />
-          </div>
+          </label>
 
-          <div className="flex items-center gap-1.5 px-3 py-1.5 bg-white dark:bg-slate-800/60 border border-slate-200/80 dark:border-slate-700/60 rounded-xl text-xs font-bold text-slate-600 dark:text-slate-300 shadow-sm">
+          <label className="flex items-center gap-1.5 px-3 py-1.5 bg-white dark:bg-slate-800/60 border border-slate-200/80 dark:border-slate-700/60 rounded-xl text-xs font-bold text-slate-600 dark:text-slate-300 shadow-sm cursor-pointer">
             <Calendar className="w-3.5 h-3.5 text-indigo-500" />
-            <span className="text-[11px] text-slate-400 dark:text-slate-500 uppercase tracking-wider font-extrabold mr-1">To</span>
+            <span className="text-[11px] text-slate-400 dark:text-slate-500 uppercase tracking-wider font-extrabold mr-1">
+              To
+            </span>
             <input
               type="date"
               value={endDate}
@@ -172,9 +202,9 @@ export const TransactionsTable: React.FC<TransactionsTableProps> = ({
                 setEndDate(e.target.value);
                 setCurrentPage(1);
               }}
-              className="bg-transparent text-slate-900 dark:text-white focus:outline-none text-xs font-bold"
+              className="bg-transparent text-slate-900 dark:text-white focus:outline-none text-xs font-bold cursor-pointer"
             />
-          </div>
+          </label>
 
           {(startDate || endDate) && (
             <button
@@ -198,25 +228,37 @@ export const TransactionsTable: React.FC<TransactionsTableProps> = ({
         <table className="w-full text-left border-collapse">
           <thead>
             <tr className="border-b border-slate-200/60 dark:border-slate-800/60 text-[11px] font-extrabold uppercase tracking-wider text-slate-400 dark:text-slate-500 bg-slate-50/30 dark:bg-slate-900/20">
-              <th className="py-4 px-6 cursor-pointer hover:text-indigo-600 transition-colors" onClick={() => handleSort('title')}>
+              <th
+                className="py-4 px-6 cursor-pointer hover:text-indigo-600 transition-colors"
+                onClick={() => handleSort('title')}
+              >
                 <div className="flex items-center gap-1.5">
                   <span>Title</span>
                   <ArrowUpDown className="w-3.5 h-3.5" />
                 </div>
               </th>
-              <th className="py-4 px-6 cursor-pointer hover:text-indigo-600 transition-colors" onClick={() => handleSort('category')}>
+              <th
+                className="py-4 px-6 cursor-pointer hover:text-indigo-600 transition-colors"
+                onClick={() => handleSort('category')}
+              >
                 <div className="flex items-center gap-1.5">
                   <span>Category</span>
                   <ArrowUpDown className="w-3.5 h-3.5" />
                 </div>
               </th>
-              <th className="py-4 px-6 cursor-pointer hover:text-indigo-600 transition-colors" onClick={() => handleSort('date')}>
+              <th
+                className="py-4 px-6 cursor-pointer hover:text-indigo-600 transition-colors"
+                onClick={() => handleSort('date')}
+              >
                 <div className="flex items-center gap-1.5">
                   <span>Date</span>
                   <ArrowUpDown className="w-3.5 h-3.5" />
                 </div>
               </th>
-              <th className="py-4 px-6 text-right cursor-pointer hover:text-indigo-600 transition-colors" onClick={() => handleSort('amount')}>
+              <th
+                className="py-4 px-6 text-right cursor-pointer hover:text-indigo-600 transition-colors"
+                onClick={() => handleSort('amount')}
+              >
                 <div className="flex items-center justify-end gap-1.5">
                   <span>Amount</span>
                   <ArrowUpDown className="w-3.5 h-3.5" />
@@ -229,11 +271,21 @@ export const TransactionsTable: React.FC<TransactionsTableProps> = ({
             {isLoading ? (
               Array.from({ length: 4 }).map((_, i) => (
                 <tr key={i}>
-                  <td className="py-4 px-6"><Skeleton className="h-5 w-40" /></td>
-                  <td className="py-4 px-6"><Skeleton className="h-5 w-20" /></td>
-                  <td className="py-4 px-6"><Skeleton className="h-5 w-24" /></td>
-                  <td className="py-4 px-6 text-right"><Skeleton className="h-5 w-16 ml-auto" /></td>
-                  <td className="py-4 px-6 text-center"><Skeleton className="h-5 w-12 mx-auto" /></td>
+                  <td className="py-4 px-6">
+                    <Skeleton className="h-5 w-40" />
+                  </td>
+                  <td className="py-4 px-6">
+                    <Skeleton className="h-5 w-20" />
+                  </td>
+                  <td className="py-4 px-6">
+                    <Skeleton className="h-5 w-24" />
+                  </td>
+                  <td className="py-4 px-6 text-right">
+                    <Skeleton className="h-5 w-16 ml-auto" />
+                  </td>
+                  <td className="py-4 px-6 text-center">
+                    <Skeleton className="h-5 w-12 mx-auto" />
+                  </td>
                 </tr>
               ))
             ) : paginatedExpenses.length === 0 ? (
@@ -246,10 +298,17 @@ export const TransactionsTable: React.FC<TransactionsTableProps> = ({
                     <div>
                       <h4 className="text-sm font-extrabold text-slate-900 dark:text-white">No transactions found</h4>
                       <p className="text-xs text-slate-400 dark:text-slate-500 font-semibold mt-1">
-                        {selectedCategory !== 'All' ? `No expense entries found in "${selectedCategory}" category.` : 'Start tracking your spending by creating your first expense entry.'}
+                        {selectedCategory !== 'All'
+                          ? `No expense entries found in "${selectedCategory}" category.`
+                          : 'Start tracking your spending by creating your first expense entry.'}
                       </p>
                     </div>
-                    <Button variant="primary" size="sm" onClick={onOpenAddModal} leftIcon={<Plus className="w-4 h-4" />}>
+                    <Button
+                      variant="primary"
+                      size="sm"
+                      onClick={onOpenAddModal}
+                      leftIcon={<Plus className="w-4 h-4" />}
+                    >
                       Add First Expense
                     </Button>
                   </div>
@@ -267,9 +326,7 @@ export const TransactionsTable: React.FC<TransactionsTableProps> = ({
                     </div>
                   </td>
                   <td className="py-4 px-6">
-                    <Badge variant={getCategoryBadgeVariant(expense.category)}>
-                      {expense.category}
-                    </Badge>
+                    <Badge variant={getCategoryBadgeVariant(expense.category)}>{expense.category}</Badge>
                   </td>
                   <td className="py-4 px-6 text-slate-500 dark:text-slate-400 text-xs font-bold">
                     {formatDate(expense.date)}

@@ -1,6 +1,21 @@
 import { useState, useEffect, useCallback } from 'react';
-import { Expense, TotalsResponse, MonthlySummaryItem, CreateExpensePayload, UpdateExpensePayload, ToastMessage } from './types';
-import { fetchExpenses, fetchTotals, fetchMonthlySummary, createExpense, updateExpense, deleteExpense, downloadCSV } from './api/expenses';
+import {
+  Expense,
+  TotalsResponse,
+  MonthlySummaryItem,
+  CreateExpensePayload,
+  UpdateExpensePayload,
+  ToastMessage,
+} from './types';
+import {
+  fetchExpenses,
+  fetchTotals,
+  fetchMonthlySummary,
+  createExpense,
+  updateExpense,
+  deleteExpense,
+  downloadCSV,
+} from './api/expenses';
 import { Navbar } from './components/Navbar';
 import { MetricsOverview } from './components/dashboard/MetricsOverview';
 import { AnalyticsSection } from './components/dashboard/AnalyticsSection';
@@ -22,7 +37,7 @@ export default function App() {
   const [endDate, setEndDate] = useState<string>('');
   const [darkMode, setDarkMode] = useState<boolean>(false);
   const [activeTab, setActiveTab] = useState<string>('dashboard');
-  
+
   const [isModalOpen, setIsModalOpen] = useState<boolean>(false);
   const [editingExpense, setEditingExpense] = useState<Expense | null>(null);
   const [viewingExpenseId, setViewingExpenseId] = useState<string | null>(null);
@@ -56,6 +71,13 @@ export default function App() {
       document.documentElement.classList.remove('dark');
     }
   }, [darkMode]);
+
+  // Redirect to transactions tab when user searches
+  useEffect(() => {
+    if (searchQuery.trim() !== '' && activeTab !== 'transactions') {
+      setActiveTab('transactions');
+    }
+  }, [searchQuery, activeTab]);
 
   // Fetch live API data
   const loadData = useCallback(async () => {
@@ -129,11 +151,13 @@ export default function App() {
   };
 
   const categories = Array.from(
-    new Set([...Object.keys(totals.byCategory), 'Food', 'Travel', 'Utilities', 'Entertainment'])
+    new Set([...Object.keys(totals.byCategory), 'Food', 'Travel', 'Utilities', 'Entertainment']),
   );
 
   return (
-    <div className={`min-h-screen transition-colors duration-300 ${darkMode ? 'bg-[#0F1117] text-white bg-ambient-dark' : 'bg-[#F8F9FD] text-slate-900 bg-ambient-light'}`}>
+    <div
+      className={`min-h-screen transition-colors duration-300 ${darkMode ? 'bg-[#0F1117] text-white bg-ambient-dark' : 'bg-[#F8F9FD] text-slate-900 bg-ambient-light'}`}
+    >
       {/* Top Navbar — Replaces left vertical sidebar completely */}
       <Navbar
         darkMode={darkMode}
@@ -163,11 +187,7 @@ export default function App() {
         {/* TAB 1: DASHBOARD VIEW */}
         {activeTab === 'dashboard' && (
           <div key="dashboard" className="space-y-8 animate-tabIn">
-            <MetricsOverview
-              overallExpense={totals.overall}
-              expenses={expenses}
-              byCategory={totals.byCategory}
-            />
+            <MetricsOverview overallExpense={totals.overall} expenses={expenses} byCategory={totals.byCategory} />
 
             <AnalyticsSection
               monthlySummary={monthlySummary}
@@ -182,7 +202,9 @@ export default function App() {
             <div className="p-6 bg-gradient-to-r from-indigo-900 via-indigo-950 to-slate-900 rounded-3xl text-white flex flex-col sm:flex-row sm:items-center justify-between gap-4 shadow-xl">
               <div>
                 <h3 className="text-lg font-extrabold tracking-tight">Need to manage or export transactions?</h3>
-                <p className="text-xs text-slate-300 font-semibold mt-1">Access the full transaction suite with multi-column sorting, search, category filters, and CSV export.</p>
+                <p className="text-xs text-slate-300 font-semibold mt-1">
+                  Access the full transaction suite with multi-column sorting, search, category filters, and CSV export.
+                </p>
               </div>
               <button
                 onClick={() => {
@@ -216,17 +238,15 @@ export default function App() {
               setEndDate={setEndDate}
               categories={categories}
               isLoading={isLoading}
+              searchQuery={searchQuery}
+              setSearchQuery={setSearchQuery}
             />
           </div>
         )}
-
       </main>
 
       {/* Expense Detail Drawer (GET /expenses/:id) */}
-      <ExpenseDetailDrawer
-        expenseId={viewingExpenseId}
-        onClose={() => setViewingExpenseId(null)}
-      />
+      <ExpenseDetailDrawer expenseId={viewingExpenseId} onClose={() => setViewingExpenseId(null)} />
 
       {/* Expense Modal */}
       <ExpenseFormModal

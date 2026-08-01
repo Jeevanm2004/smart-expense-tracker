@@ -9,7 +9,7 @@ import {
   Search,
   Calendar,
   Activity,
-  AlertCircle
+  AlertCircle,
 } from 'lucide-react';
 import { fetchHealthCheck } from '../api/expenses';
 
@@ -30,7 +30,7 @@ export const Navbar: React.FC<NavbarProps> = ({
   setActiveTab,
   onOpenAddModal,
   searchQuery,
-  setSearchQuery
+  setSearchQuery,
 }) => {
   const [healthStatus, setHealthStatus] = useState<{ isHealthy: boolean; timestamp?: string; loading: boolean }>({
     isHealthy: true,
@@ -45,7 +45,7 @@ export const Navbar: React.FC<NavbarProps> = ({
         if (!cancelled) {
           setHealthStatus({ isHealthy: data.status === 'OK', timestamp: data.timestamp, loading: false });
         }
-      } catch (err) {
+      } catch {
         if (!cancelled) {
           setHealthStatus({ isHealthy: false, loading: false });
         }
@@ -65,7 +65,6 @@ export const Navbar: React.FC<NavbarProps> = ({
     day: 'numeric',
   });
 
-
   const navItems = [
     { id: 'dashboard', label: 'Dashboard', icon: LayoutDashboard },
     { id: 'transactions', label: 'Transactions', icon: Receipt },
@@ -75,19 +74,18 @@ export const Navbar: React.FC<NavbarProps> = ({
     <header className="sticky top-0 z-40 bg-white/90 dark:bg-[#13151D]/90 backdrop-blur-xl border-b border-slate-200/80 dark:border-slate-800/80 transition-colors duration-300">
       <div className="w-full pl-4 pr-4 sm:pl-6 sm:pr-6 lg:pl-8 lg:pr-8">
         <div className="flex items-center justify-between h-18 py-3 gap-4">
-          
           {/* Left: Brand Logo & Title */}
           <div className="flex items-center gap-3 shrink-0">
             <div className="w-9 h-9 rounded-2xl shadow-lg shadow-sky-500/20 ring-4 ring-sky-500/10 shrink-0 overflow-hidden">
               <svg width="36" height="36" viewBox="0 0 32 32" fill="none" xmlns="http://www.w3.org/2000/svg">
-                <rect width="32" height="32" rx="8" fill="#0f0f1a"/>
-                <rect x="5" y="20" width="5" height="7" rx="1.5" fill="url(#nav-c1)" opacity="0.5"/>
-                <rect x="13" y="13" width="5" height="14" rx="1.5" fill="url(#nav-c1)" opacity="0.75"/>
-                <rect x="21" y="7" width="5" height="20" rx="1.5" fill="url(#nav-c1)"/>
+                <rect width="32" height="32" rx="8" fill="#0f0f1a" />
+                <rect x="5" y="20" width="5" height="7" rx="1.5" fill="url(#nav-c1)" opacity="0.5" />
+                <rect x="13" y="13" width="5" height="14" rx="1.5" fill="url(#nav-c1)" opacity="0.75" />
+                <rect x="21" y="7" width="5" height="20" rx="1.5" fill="url(#nav-c1)" />
                 <defs>
                   <linearGradient id="nav-c1" x1="16" y1="6" x2="16" y2="28" gradientUnits="userSpaceOnUse">
-                    <stop stopColor="#38bdf8"/>
-                    <stop offset="1" stopColor="#6366f1"/>
+                    <stop stopColor="#38bdf8" />
+                    <stop offset="1" stopColor="#6366f1" />
                   </linearGradient>
                 </defs>
               </svg>
@@ -115,7 +113,7 @@ export const Navbar: React.FC<NavbarProps> = ({
               className="absolute top-1 bottom-1 rounded-xl bg-indigo-600 shadow-md shadow-indigo-500/30 transition-all duration-300 ease-[cubic-bezier(0.4,0,0.2,1)]"
               style={{
                 width: `calc(50% - 4px)`,
-                transform: `translateX(${navItems.findIndex(n => n.id === activeTab) * 100}%)`,
+                transform: `translateX(${navItems.findIndex((n) => n.id === activeTab) * 100}%)`,
                 left: '4px',
               }}
             />
@@ -133,9 +131,13 @@ export const Navbar: React.FC<NavbarProps> = ({
                     className="w-4 h-4 transition-colors duration-300"
                     style={{ color: isActive ? 'white' : undefined }}
                   />
-                  <span className={`transition-colors duration-300 ${
-                    isActive ? 'text-white' : 'text-slate-600 dark:text-slate-400'
-                  }`}>{item.label}</span>
+                  <span
+                    className={`transition-colors duration-300 ${
+                      isActive ? 'text-white' : 'text-slate-600 dark:text-slate-400'
+                    }`}
+                  >
+                    {item.label}
+                  </span>
                 </button>
               );
             })}
@@ -150,7 +152,12 @@ export const Navbar: React.FC<NavbarProps> = ({
                 type="text"
                 placeholder="Search expenses..."
                 value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
+                onChange={(e) => {
+                  setSearchQuery(e.target.value);
+                  if (activeTab !== 'transactions') {
+                    setActiveTab('transactions');
+                  }
+                }}
                 className="w-full pl-9 pr-3 py-2 bg-slate-50 dark:bg-[#161922] border border-slate-200/80 dark:border-slate-800/80 rounded-xl text-xs font-semibold text-slate-900 dark:text-white placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-indigo-500/50 focus:border-indigo-500 transition-all"
               />
             </div>
@@ -163,7 +170,11 @@ export const Navbar: React.FC<NavbarProps> = ({
 
             {/* API Health Check Status Badge (GET /health) */}
             <div
-              title={healthStatus.timestamp ? `Server health OK (Checked ${new Date(healthStatus.timestamp).toLocaleTimeString()})` : 'System Health'}
+              title={
+                healthStatus.timestamp
+                  ? `Server health OK (Checked ${new Date(healthStatus.timestamp).toLocaleTimeString()})`
+                  : 'System Health'
+              }
               className={`hidden sm:flex items-center gap-1.5 px-2.5 py-2 rounded-xl text-[11px] font-bold border transition-colors ${
                 healthStatus.isHealthy
                   ? 'bg-emerald-50 dark:bg-emerald-950/40 border-emerald-200 dark:border-emerald-800/60 text-emerald-600 dark:text-emerald-400'
