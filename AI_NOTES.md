@@ -58,3 +58,6 @@ I reviewed, validated, and optimized the AI's generated code to resolve bugs and
 4. **Pagination Reset & Search Synchronization**:
    - *My Audit*: Identified that searching or changing categories caused the transaction history table to return empty views because the local page state (`currentPage`) was not reset, leaving the table page index stranded on page indices out of bounds. Also found that `searchQuery` states were isolated between the navbar header and table.
    - *My Fix*: Structured a centralized query binding across the frontend, and configured state listeners to force-reset the pagination index back to `1` on search term updates or category shifts.
+
+### Multi-Stage Containerization (Docker)
+- **Rationale**: I designed a multi-stage build pipeline ([`Dockerfile`](`file:///Users/arjun/Downloads/smart-expense-tracker/Dockerfile`)) that compiles the React client in Stage 1, transpiles the backend TypeScript code in Stage 2, and bundles them into a lightweight Alpine production runner in Stage 3 using only production dependencies (`npm install --omit=dev`). I also configured local volume mapping inside [`docker-compose.yml`](`file:///Users/arjun/Downloads/smart-expense-tracker/docker-compose.yml`) to persist transaction files.

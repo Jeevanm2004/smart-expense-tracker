@@ -1,0 +1,11 @@
+services:
+  app:
+    build: .
+    container_name: smart-expense-tracker-app
+    ports:
+      - "5001:5001"
+    environment:
+      - PORT=5001
+      - NODE_ENV=production
+    volumes:
+      - ./src/data:/app/src/data

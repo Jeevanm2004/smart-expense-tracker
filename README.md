@@ -4,7 +4,7 @@ Production-grade, full-stack personal expense tracking solution. Features a robu
 
 ---
 
-## 🚀 Quick Start Instructions
+## Quick Start Instructions
 
 Follow these exact commands to install dependencies, start the server, and run the test suite on a clean checkout:
 
@@ -27,9 +27,18 @@ npm start
 - **Interactive Swagger Docs**: `http://localhost:5001/api-docs`
 - **REST API Server**: `http://localhost:5001`
 
+### 4. Run with Docker
+```bash
+docker compose up --build
+```
+- **DilliCents Dashboard Web UI**: `http://localhost:5001`
+- **Interactive Swagger Docs**: `http://localhost:5001/api-docs`
+- **REST API Server**: `http://localhost:5001`
+- *Spins up both services inside a multi-stage production container with a persistent database file volume mounted at `./src/data`.*
+
 ---
 
-## ⚙️ Environment Variables & Configuration
+## Environment Variables & Configuration
 
 The application can be configured via environment variables or runs out-of-the-box with sane production defaults:
 
@@ -41,7 +50,7 @@ The application can be configured via environment variables or runs out-of-the-b
 
 ---
 
-## 📡 REST API Specifications & Documentation
+## REST API Specifications & Documentation
 
 | Method | Endpoint | Purpose | Query / Body Parameters | Status Codes |
 |---|---|---|---|---|
@@ -62,7 +71,7 @@ The application can be configured via environment variables or runs out-of-the-b
 
 ---
 
-## 💻 Example `curl` Commands
+## Example `curl` Commands
 
 #### 1. Add an Expense (`POST /expenses`)
 ```bash
@@ -128,7 +137,7 @@ curl -X DELETE http://localhost:5001/expenses/exp-101
 
 ---
 
-## 🛡️ Standardized Error Response Contract
+## Standardized Error Response Contract
 
 All error responses from the API return structured JSON objects with HTTP status codes:
 
@@ -145,7 +154,7 @@ All error responses from the API return structured JSON objects with HTTP status
 
 ---
 
-## 📁 Repository Structure
+## Repository Structure
 
 ```
 smart-expense-tracker/
@@ -174,7 +183,7 @@ smart-expense-tracker/
 
 ---
 
-## ✨ Key Technical Architecture Features
+## Key Technical Architecture Features
 - **Atomic File Storage (`fs.renameSync`)**: Writes data to a temporary file before renaming, eliminating race conditions or file corruption during high concurrency.
 - **Integer Cents Precision**: Accumulates financial totals using integer arithmetic to eliminate JavaScript floating-point drift.
 - **Dynamic Live React UI**: Connected bar charts and donut rings directly to live API data.
