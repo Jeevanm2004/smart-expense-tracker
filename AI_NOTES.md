@@ -29,3 +29,6 @@ I reviewed, validated, and optimized the AI's generated code to resolve bugs and
 
 ### Type-Safe Enums & Constants Pattern
 - **Rationale**: To eliminate code smell and magic strings, I designed a centralized constants repository (`src/constants/index.ts`), organizing HTTP status codes, error messages, and network configurations into strictly typed enums (`HttpStatus`, `ErrorResponse`, `NodeEnv`, `CorsMethod`).
+
+### Code Quality, Linting & Formatting Guidelines
+- **Rationale**: I established strict code quality policies by introducing a project-wide Prettier formatter configuration (`.prettierrc`) and an ESLint ruleset (`eslint.config.js`). This ensures a consistent code style across both backend and frontend layers (semi-colons, single quotes, 2-space tab widths) and automatically checks for dead code or unused variables.
