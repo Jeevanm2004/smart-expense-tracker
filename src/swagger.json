@@ -1,0 +1,207 @@
+{
+  "openapi": "3.0.0",
+  "info": {
+    "title": "Smart Expense Tracker REST API",
+    "version": "1.0.0",
+    "description": "Production-grade RESTful API built for managing personal expenses."
+  },
+  "servers": [
+    {
+      "url": "http://localhost:5001",
+      "description": "Local Development Server"
+    }
+  ],
+  "paths": {
+    "/expenses": {
+      "get": {
+        "summary": "View all expenses or filter by category / search query / date range",
+        "parameters": [
+          {
+            "name": "category",
+            "in": "query",
+            "required": false,
+            "schema": { "type": "string" },
+            "description": "Filter expenses by category (e.g. Food, Travel, Utilities)"
+          },
+          {
+            "name": "search",
+            "in": "query",
+            "required": false,
+            "schema": { "type": "string" },
+            "description": "Search keyword for expense title or category"
+          },
+          {
+            "name": "startDate",
+            "in": "query",
+            "required": false,
+            "schema": { "type": "string", "example": "2026-07-01" },
+            "description": "Filter expenses starting from date (YYYY-MM-DD)"
+          },
+          {
+            "name": "endDate",
+            "in": "query",
+            "required": false,
+            "schema": { "type": "string", "example": "2026-07-31" },
+            "description": "Filter expenses up to date (YYYY-MM-DD)"
+          },
+          {
+            "name": "page",
+            "in": "query",
+            "required": false,
+            "schema": { "type": "integer", "default": 1 },
+            "description": "Page number for pagination"
+          },
+          {
+            "name": "limit",
+            "in": "query",
+            "required": false,
+            "schema": { "type": "integer", "default": 50 },
+            "description": "Number of items per page"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "List of expense objects"
+          },
+          "400": {
+            "description": "Validation error on date parameters"
+          }
+        }
+      },
+      "post": {
+        "summary": "Add a new expense",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": ["title", "amount", "category", "date"],
+                "properties": {
+                  "title": { "type": "string", "example": "Groceries", "maxLength": 150 },
+                  "amount": { "type": "number", "example": 45.5 },
+                  "category": { "type": "string", "example": "Food", "maxLength": 50 },
+                  "date": { "type": "string", "example": "2026-07-30" }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": { "description": "Expense successfully created" },
+          "400": { "description": "Validation error on missing or invalid fields" }
+        }
+      }
+    },
+    "/expenses/total": {
+      "get": {
+        "summary": "Get total expenses overall and broken down by category",
+        "responses": {
+          "200": {
+            "description": "Total calculation summary",
+            "content": {
+              "application/json": {
+                "example": {
+                  "overall": 320.75,
+                  "byCategory": {
+                    "Food": 120.5,
+                    "Travel": 200.25
+                  },
+                  "count": 5
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/expenses/monthly-summary": {
+      "get": {
+        "summary": "Get aggregated monthly summary of expenses (Bonus Feature)",
+        "responses": {
+          "200": {
+            "description": "Monthly aggregation array with top category and totals"
+          }
+        }
+      }
+    },
+    "/expenses/export/csv": {
+      "get": {
+        "summary": "Export expenses list as a downloadable CSV file",
+        "responses": {
+          "200": {
+            "description": "CSV File payload",
+            "content": {
+              "text/csv": {}
+            }
+          }
+        }
+      }
+    },
+    "/expenses/{id}": {
+      "get": {
+        "summary": "Fetch a single expense by ID",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": { "type": "string" },
+            "description": "Unique Expense ID"
+          }
+        ],
+        "responses": {
+          "200": { "description": "Expense object retrieved successfully" },
+          "404": { "description": "Expense with specified ID not found" }
+        }
+      },
+      "put": {
+        "summary": "Update an existing expense by ID",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": { "type": "string" }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "title": { "type": "string", "maxLength": 150 },
+                  "amount": { "type": "number" },
+                  "category": { "type": "string", "maxLength": 50 },
+                  "date": { "type": "string" }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": { "description": "Expense successfully updated" },
+          "400": { "description": "Validation error" },
+          "404": { "description": "Expense not found" }
+        }
+      },
+      "delete": {
+        "summary": "Delete an expense by ID",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": { "type": "string" }
+          }
+        ],
+        "responses": {
+          "200": { "description": "Expense successfully deleted" },
+          "404": { "description": "Expense with specified ID not found" }
+        }
+      }
+    }
+  }
+}
